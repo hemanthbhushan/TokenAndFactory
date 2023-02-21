@@ -6,22 +6,22 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
  contract FactoryContract is Ownable{
     
-     address public implementation; 
+    address public implementation; 
    
-     address public adminAddress;
+    address public adminAddress;
 
 
 
-     struct TokenDetails{
+    struct TokenDetails{
         string name;
         string symbol;
         uint8 decimals;
         uint256 initialSupply;
     }
 
-  address[] public storeAddress;
-   mapping(address=>TokenDetails) public registerToken;
-   mapping(address=>bool) public registered;
+    address[] public storeAddress;
+    mapping(address=>TokenDetails) public registerToken;
+    mapping(address=>bool) public registered;
 
     event tokenRegistered(
         address indexed tokenAddress,
@@ -86,13 +86,24 @@ import "@openzeppelin/contracts/access/Ownable.sol";
         emit tokenRegistered(_tokenAddress,tokenDetails);
     }
 
-     function unregisterTokens(address _tokenAddress) external onlyOwner  {
+
+
+    function unregisterTokens(address _tokenAddress) external onlyOwner  {
 
         require(_tokenAddress!= address(0) ,"invalid Token address");
         require(registered[_tokenAddress],"token address is not registered");
         
 
          TokenDetails memory details = registerToken[_tokenAddress];
+
+
+         for(uint i=0;i<storeAddress.length;i++){
+
+         if(storeAddress[i]== _tokenAddress){
+                storeAddress[i] = storeAddress[storeAddress.length-1];
+                storeAddress.pop();
+                 }
+         }
 
          
 
