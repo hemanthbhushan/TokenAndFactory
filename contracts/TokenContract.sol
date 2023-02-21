@@ -34,9 +34,7 @@ contract TokenContract is ERC20,Ownable{
     
     
 
-    constructor(string memory _name,string memory _symbol)ERC20(_name,_symbol){
-         
-    }
+    constructor(string memory _name,string memory _symbol)ERC20(_name,_symbol){}
 
     function mint(address _to, uint256 _amount) public  onlyAdmin {
       
@@ -96,7 +94,7 @@ contract TokenContract is ERC20,Ownable{
 
     }
 
-     function removeBlackkListBatch(address[] memory _removeBlankList) public onlyAdmin{
+    function removeBlackkListBatch(address[] memory _removeBlankList) public onlyAdmin{
 
         for(uint i = 0; i<_removeBlankList.length;i++){
 
@@ -109,7 +107,7 @@ contract TokenContract is ERC20,Ownable{
 
     }
 
-     function adminRole(address _adminAddress) public onlyOwner {
+    function adminRole(address _adminAddress) public onlyOwner {
         adminAddress = _adminAddress;
     }
 
