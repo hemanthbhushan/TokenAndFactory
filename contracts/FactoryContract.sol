@@ -88,7 +88,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 
-    function unregisterTokens(address _tokenAddress) external onlyOwner  {
+    function unregisterTokens(address _tokenAddress) external onlyAdmin  {
 
         require(_tokenAddress!= address(0) ,"invalid Token address");
         require(registered[_tokenAddress],"token address is not registered");
@@ -114,7 +114,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
     }
 
-     function transferOwnershipOnTokenContract(address _newOwner) external  onlyAdmin {
+     function transferOwnershipOnTokenContract(address _newOwner) external  onlyOwner {
         transferOwnership(_newOwner);
     }
 
