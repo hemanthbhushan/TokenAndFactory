@@ -19,7 +19,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
         uint256 initialSupply;
     }
 
-    address[] public storeAddress;
+  address[] public storeAddress;
    mapping(address=>TokenDetails) public registerToken;
    mapping(address=>bool) public registered;
 
@@ -42,9 +42,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
     
     constructor(address _implementation){
-        
-       
-         implementation = _implementation;
+        implementation = _implementation;
     }
  
 
