@@ -73,7 +73,7 @@ contract TokenContract is ERC20,Ownable{
 
 
      function addBlackList(address _userAddress,bool _freeze) external onlyAdmin {
-        require(!blankList[_userAddress], "address already blacklisted");
+       
          blankList[_userAddress] = _freeze;
         emit AddressFrozen(_userAddress, _freeze, msg.sender);
        }
