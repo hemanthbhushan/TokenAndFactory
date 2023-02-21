@@ -44,7 +44,7 @@ contract TokenContract is ERC20,Ownable{
 
 
 
-    function burn(address _userAddress, uint256 _amount) public  onlyAdmin {
+    function burn(address _userAddress, uint256 _amount) external  onlyAdmin {
       uint256 freeBalance = balanceOf(_userAddress) - frozenTokens[_userAddress];
         if (_amount > freeBalance) {
             uint256 tokensToUnfreeze = _amount - (freeBalance);
@@ -56,14 +56,14 @@ contract TokenContract is ERC20,Ownable{
     }
 
 
-  function freezeTokens(address _userAddress, uint256 _amount) public  onlyAdmin {
+  function freezeTokens(address _userAddress, uint256 _amount) external  onlyAdmin {
         uint256 balance = balanceOf(_userAddress);
         require(balance >= frozenTokens[_userAddress] + _amount, "Amount exceeds available balance");
         frozenTokens[_userAddress] = frozenTokens[_userAddress] + (_amount);
         emit TokensFrozen(_userAddress, _amount);
     }
 
-     function unfreezeTokens(address _userAddress, uint256 _amount) public  onlyAdmin {
+     function unfreezeTokens(address _userAddress, uint256 _amount) external  onlyAdmin {
         require(frozenTokens[_userAddress] >= _amount, "Amount should be less than or equal to frozen tokens");
         frozenTokens[_userAddress] = frozenTokens[_userAddress] - (_amount);
         emit TokensUnfrozen(_userAddress, _amount);
@@ -72,7 +72,7 @@ contract TokenContract is ERC20,Ownable{
 
 
 
-     function addBlackList(address _userAddress,bool _freeze) public onlyAdmin {
+     function addBlackList(address _userAddress,bool _freeze) external onlyAdmin {
         require(!frozen[_userAddress], "address already frozen");
         frozen[_userAddress] = _freeze;
         emit AddressFrozen(_userAddress, _freeze, msg.sender);
@@ -80,7 +80,7 @@ contract TokenContract is ERC20,Ownable{
 
   
 
-    function addBlackListBatch(address[] memory _blankList) public onlyAdmin{
+    function addBlackListBatch(address[] memory _blankList) external onlyAdmin{
 
         for(uint i = 0; i<_blankList.length;i++){
 
@@ -94,7 +94,7 @@ contract TokenContract is ERC20,Ownable{
 
     }
 
-    function removeBlackkListBatch(address[] memory _removeBlankList) public onlyAdmin{
+    function removeBlackkListBatch(address[] memory _removeBlankList) external onlyAdmin{
 
         for(uint i = 0; i<_removeBlankList.length;i++){
 
@@ -107,7 +107,7 @@ contract TokenContract is ERC20,Ownable{
 
     }
 
-    function adminRole(address _adminAddress) public onlyOwner {
+    function adminRole(address _adminAddress) external onlyOwner {
         adminAddress = _adminAddress;
     }
 
