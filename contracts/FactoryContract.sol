@@ -46,7 +46,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
     }
  
 
-    function adminRole(address _adminAddress) public onlyOwner {
+    function adminRole(address _adminAddress) external onlyOwner {
         adminAddress = _adminAddress;
     }
 
