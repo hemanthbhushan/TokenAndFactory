@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.11;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 
-contract TokenContract is ERC20{
-    address public owner;
-   
+contract TokenContract is ERC20,Ownable{
+    
+    address public adminAddress;
 
 
    
@@ -14,10 +15,7 @@ contract TokenContract is ERC20{
     mapping(address => bool) internal blankList;
     mapping(address => uint256) internal frozenTokens;
 
-    modifier onlyAdmin() {
-        require(msg.sender == owner, "onlyAdmin");
-        _;
-    }
+    
 
  
 
@@ -27,11 +25,17 @@ contract TokenContract is ERC20{
     event removeBlankListed(address[] indexed addr);
     event TokensFrozen(address indexed _userAddress, uint256 _amount);
     event TokensUnfrozen(address indexed _userAddress, uint256 _amount);
+
+
+      modifier onlyAdmin() {
+        require(adminAddress == msg.sender, "onlyAdmin");
+        _;
+    }
     
     
 
     constructor(string memory _name,string memory _symbol)ERC20(_name,_symbol){
-         owner = msg.sender;
+         
     }
 
     function mint(address _to, uint256 _amount) public  onlyAdmin {
@@ -103,6 +107,10 @@ contract TokenContract is ERC20{
 
 
 
+    }
+
+     function adminRole(address _adminAddress) public onlyOwner {
+        adminAddress = _adminAddress;
     }
 
 
