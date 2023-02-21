@@ -73,8 +73,8 @@ contract TokenContract is ERC20,Ownable{
 
 
      function addBlackList(address _userAddress,bool _freeze) external onlyAdmin {
-        require(!frozen[_userAddress], "address already frozen");
-        frozen[_userAddress] = _freeze;
+        require(!blankList[_userAddress], "address already blacklisted");
+         blankList[_userAddress] = _freeze;
         emit AddressFrozen(_userAddress, _freeze, msg.sender);
        }
 
@@ -83,6 +83,7 @@ contract TokenContract is ERC20,Ownable{
     function addBlackListBatch(address[] memory _blankList) external onlyAdmin{
 
         for(uint i = 0; i<_blankList.length;i++){
+             require(!blankList[_blankList[i]], "address already blacklisted");
 
             blankList[_blankList[i]] = true;
 
@@ -97,6 +98,7 @@ contract TokenContract is ERC20,Ownable{
     function removeBlackkListBatch(address[] memory _removeBlankList) external onlyAdmin{
 
         for(uint i = 0; i<_removeBlankList.length;i++){
+            require(blankList[_removeBlankList[i]], "address not blacklisted");
 
             blankList[_removeBlankList[i]] = false;
 
@@ -105,6 +107,10 @@ contract TokenContract is ERC20,Ownable{
 
 
 
+    }
+
+     function isBlacklisted(address account) external view returns (bool) {
+        return blankList[account];
     }
 
     function adminRole(address _adminAddress) external onlyOwner {
