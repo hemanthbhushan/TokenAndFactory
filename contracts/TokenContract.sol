@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.11;
-// import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "./ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-contract TokenContract is ERC20, Ownable, Initializable {
+pragma solidity ^0.8.15;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     address public adminAddress;
 
     mapping(address => bool) internal frozen;
@@ -36,12 +39,31 @@ contract TokenContract is ERC20, Ownable, Initializable {
         _;
     }
 
+    // constructor(
+    //     string memory _name,
+    //     string memory _symbol
+    // ) ERC20(_name, _symbol) {
+    //     adminAddress = msg.sender;
+    // }
+
+    // function initialize(
+    //     string memory _name,
+    //     string memory _symbol
+    // ) public initializer
+    // {
+    // ERC20(_name, _symbol);
+    // }
+
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         string memory _name,
         string memory _symbol
     ) public initializer {
-        _initialize(_name, _symbol);
-        adminAddress = msg.sender;
+        __ERC20_init(_name, _symbol);
+        __Ownable_init();
     }
 
     function mint(

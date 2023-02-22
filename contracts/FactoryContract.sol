@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.15;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "./BasicMetaTransaction.sol";
-import "./IERC20.sol";
+import "./interfaces/IToken.sol";
 import "hardhat/console.sol";
 
 contract FactoryContract is BasicMetaTransaction, Ownable {
@@ -29,7 +29,11 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         address indexed tokenAddress,
         TokenDetails indexed tokenDetails
     );
-
+     event TokenCreated(
+        string name,
+        string symbol,
+        address tokenAddress
+    );
     event tokenUnregistered(
         address indexed tokenAddress,
         string indexed name,
@@ -55,7 +59,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
 
     //    }
 
-    function CreateToken(
+    function createToken(
         string calldata _name,
         string calldata _symbol,
         uint8 _decimals,
@@ -63,10 +67,8 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
     ) external onlyAdmin returns (address _tokenAddress) {
         _tokenAddress = Clones.clone(implementation);
         console.log(_tokenAddress, "token address");
-        
-        IERC20(_tokenAddress).initialize(_name, _symbol);
+        // IERC20(_tokenAddress).initialize(_name, _symbol);
         console.log("in side contract");
-        
 
         registerTokens(
             TokenDetails({
@@ -78,7 +80,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
             }),
             address(_tokenAddress)
         );
-
+        emit TokenCreated(_name, _symbol,_tokenAddress);
         return _tokenAddress;
     }
 
@@ -126,7 +128,9 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         emit tokenUnregistered(_tokenAddress, details.name, details.symbol);
     }
 
-    function getTokenDetails(address _tokenAddress) public view returns(TokenDetails memory){
+    function getTokenDetails(
+        address _tokenAddress
+    ) public view returns (TokenDetails memory) {
         return registerToken[_tokenAddress];
     }
 
