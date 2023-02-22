@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "./BasicMetaTransaction.sol";
+import "./IERC20.sol";
 import "hardhat/console.sol";
 
 contract FactoryContract is BasicMetaTransaction, Ownable {
@@ -40,9 +41,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         _;
     }
 
-    constructor(address _implementation)
-        
-    {
+    constructor(address _implementation) {
         implementation = _implementation;
         adminAddress = msg.sender;
     }
@@ -51,6 +50,11 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         adminAddress = _adminAddress;
     }
 
+    //    function _initialize(address tokenAddress ,string memory _name, string memory _symbol) public {
+    //     IERC20(tokenAddress)._initialize(_name, _symbol);
+
+    //    }
+
     function CreateToken(
         string calldata _name,
         string calldata _symbol,
@@ -58,14 +62,19 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         uint256 _initialSupply
     ) external onlyAdmin returns (address _tokenAddress) {
         _tokenAddress = Clones.clone(implementation);
-        console.log(_tokenAddress,"token address");
+        console.log(_tokenAddress, "token address");
+        
+        IERC20(_tokenAddress).initialize(_name, _symbol);
+        console.log("in side contract");
+        
+
         registerTokens(
             TokenDetails({
                 name: _name,
                 symbol: _symbol,
                 decimals: _decimals,
                 initialSupply: _initialSupply,
-                tokenAddress:_tokenAddress 
+                tokenAddress: _tokenAddress
             }),
             address(_tokenAddress)
         );
@@ -88,10 +97,10 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
             symbol: tokenDetails.symbol,
             decimals: tokenDetails.decimals,
             initialSupply: tokenDetails.initialSupply,
-            tokenAddress:tokenDetails.tokenAddress
+            tokenAddress: tokenDetails.tokenAddress
         });
         registered[_tokenAddress] = true;
-     
+
         storeTokenDetails.push(registerToken[_tokenAddress]);
 
         emit tokenRegistered(_tokenAddress, tokenDetails);
@@ -103,11 +112,11 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
 
         TokenDetails memory details = registerToken[_tokenAddress];
 
-
-
         for (uint256 i = 0; i < storeTokenDetails.length; i++) {
             if (storeTokenDetails[i].tokenAddress == _tokenAddress) {
-                storeTokenDetails[i] = storeTokenDetails[storeTokenDetails.length - 1];
+                storeTokenDetails[i] = storeTokenDetails[
+                    storeTokenDetails.length - 1
+                ];
                 storeTokenDetails.pop();
             }
         }
@@ -117,12 +126,11 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         emit tokenUnregistered(_tokenAddress, details.name, details.symbol);
     }
 
-   function tokensRegistered() public view returns(TokenDetails[] memory) {
-    return storeTokenDetails;
-    
-   } 
+    function getTokenDetails(address _tokenAddress) public view returns(TokenDetails memory){
+        return registerToken[_tokenAddress];
+    }
 
-
-    
-
+    function tokensRegistered() public view returns (TokenDetails[] memory) {
+        return storeTokenDetails;
+    }
 }

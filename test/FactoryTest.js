@@ -29,8 +29,8 @@ describe("CHECK FACTORY CONTRACT",()=>{
   it("testing CreateToken... ",async()=>{
      
     
-   
     const tokenAddress = await factory.connect(admin).CreateToken("OneSolutions","onex",18,10000000000000);
+   
     const tokenAddress1 = await factory.connect(admin).CreateToken("TwoSolutions","twox",18,10000000000000);
 
     console.log(await factory.tokensRegistered());
@@ -74,6 +74,23 @@ describe("CHECK FACTORY CONTRACT",()=>{
       expect(tokensCreated1.length).to.equal(0);
   
 
+
+  })
+
+  it("check getTokenDetails function" ,async()=>{
+
+    const tokenAddress = await factory.connect(admin).CreateToken("OneSolutions","onex",18,10000000000000);
+   
+    const token = await factory.tokensRegistered()
+  
+
+    console.log(await factory.getTokenDetails("0xCafac3dD18aC6c6e92c921884f9E4176737C052c"));
+
+    await factory.connect(admin).unregisterTokens("0xCafac3dD18aC6c6e92c921884f9E4176737C052c");
+
+
+
+    console.log(await factory.getTokenDetails("0xCafac3dD18aC6c6e92c921884f9E4176737C052c"),"afterrrrrrr");
 
   })
 
