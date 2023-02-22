@@ -59,7 +59,26 @@ it("checking burn ",async()=>{
     expect(await token.balanceOf(signer1.address)).to.equal(50);
 })
 
-it("")
+it("burn function if user blacklisted",async()=>{
+
+    await token.addBlackList(signer1.address,true);
+  
+    expect(token.burn(signer1.address,100)).to.be.revertedWith("Blacklistable: account is blacklisted");
+    
+    await token.addBlackListBatch([owner.address,signer2.address]);
+    
+    expect(token.burn(signer1.address,100)).to.be.revertedWith("Blacklistable: account is blacklisted");
+    
+
+})
+
+it("burn function only admin",async()=>{ 
+    await token.adminRole(signer1.address);
+    expect(token.burn(signer1.address,100)).to.be.revertedWith("onlyAdmin");
+   
+});
+
+
 
 
 
