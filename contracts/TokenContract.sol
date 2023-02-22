@@ -108,7 +108,8 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
             _amount <= balanceOf(msg.sender) - (frozenTokens[msg.sender]),
             "Insufficient Balance"
         );
-        transfer(_to, _amount);
+       
+       return super.transfer(_to, _amount);
     }
 
     function transferFrom(
@@ -127,7 +128,8 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
             _amount <= balanceOf(_from) - (frozenTokens[_from]),
             "Insufficient Balance"
         );
-        transferFrom(_from, _to, _amount);
+       return super.transferFrom(_from, _to, _amount);
+
     }
 
     function freezeTokens(
