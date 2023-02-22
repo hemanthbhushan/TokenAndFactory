@@ -20,7 +20,6 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         address tokenAddress;
     }
 
-    address[] public storeAddress;
     TokenDetails[] public storeTokenDetails;
     mapping(address => TokenDetails) public registerToken;
     mapping(address => bool) public registered;
@@ -45,6 +44,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         
     {
         implementation = _implementation;
+        adminAddress = msg.sender;
     }
 
     function adminRole(address _adminAddress) external onlyOwner {
@@ -91,7 +91,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
             tokenAddress:tokenDetails.tokenAddress
         });
         registered[_tokenAddress] = true;
-        // storeAddress.push(_tokenAddress);
+     
         storeTokenDetails.push(registerToken[_tokenAddress]);
 
         emit tokenRegistered(_tokenAddress, tokenDetails);
@@ -103,12 +103,6 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
 
         TokenDetails memory details = registerToken[_tokenAddress];
 
-        // for (uint256 i = 0; i < storeAddress.length; i++) {
-        //     if (storeAddress[i] == _tokenAddress) {
-        //         storeAddress[i] = storeAddress[storeAddress.length - 1];
-        //         storeAddress.pop();
-        //     }
-        // }
 
 
         for (uint256 i = 0; i < storeTokenDetails.length; i++) {
@@ -128,12 +122,6 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
     
    } 
 
-    function transferOwnershipOnTokenContract(address _newOwner)
-        external
-        onlyOwner
-    {
-        transferOwnership(_newOwner);
-    }
 
     
 
