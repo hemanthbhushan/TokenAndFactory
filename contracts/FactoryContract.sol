@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "./BasicMetaTransaction.sol";
+import "hardhat/console.sol";
 
 contract FactoryContract is BasicMetaTransaction, Ownable {
     address public implementation;
@@ -16,9 +17,11 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         string symbol;
         uint8 decimals;
         uint256 initialSupply;
+        address tokenAddress;
     }
 
     address[] public storeAddress;
+    TokenDetails[] public storeTokenDetails;
     mapping(address => TokenDetails) public registerToken;
     mapping(address => bool) public registered;
 
@@ -53,19 +56,21 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         string calldata _symbol,
         uint8 _decimals,
         uint256 _initialSupply
-    ) external onlyAdmin returns (address tokenAddress) {
-        tokenAddress = Clones.clone(implementation);
+    ) external onlyAdmin returns (address _tokenAddress) {
+        _tokenAddress = Clones.clone(implementation);
+        console.log(_tokenAddress,"token address");
         registerTokens(
             TokenDetails({
                 name: _name,
                 symbol: _symbol,
                 decimals: _decimals,
-                initialSupply: _initialSupply
+                initialSupply: _initialSupply,
+                tokenAddress:_tokenAddress 
             }),
-            address(tokenAddress)
+            address(_tokenAddress)
         );
 
-        return tokenAddress;
+        return _tokenAddress;
     }
 
     function registerTokens(
@@ -82,10 +87,12 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
             name: tokenDetails.name,
             symbol: tokenDetails.symbol,
             decimals: tokenDetails.decimals,
-            initialSupply: tokenDetails.initialSupply
+            initialSupply: tokenDetails.initialSupply,
+            tokenAddress:tokenDetails.tokenAddress
         });
         registered[_tokenAddress] = true;
-        storeAddress.push(_tokenAddress);
+        // storeAddress.push(_tokenAddress);
+        storeTokenDetails.push(registerToken[_tokenAddress]);
 
         emit tokenRegistered(_tokenAddress, tokenDetails);
     }
@@ -96,10 +103,18 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
 
         TokenDetails memory details = registerToken[_tokenAddress];
 
-        for (uint256 i = 0; i < storeAddress.length; i++) {
-            if (storeAddress[i] == _tokenAddress) {
-                storeAddress[i] = storeAddress[storeAddress.length - 1];
-                storeAddress.pop();
+        // for (uint256 i = 0; i < storeAddress.length; i++) {
+        //     if (storeAddress[i] == _tokenAddress) {
+        //         storeAddress[i] = storeAddress[storeAddress.length - 1];
+        //         storeAddress.pop();
+        //     }
+        // }
+
+
+        for (uint256 i = 0; i < storeTokenDetails.length; i++) {
+            if (storeTokenDetails[i].tokenAddress == _tokenAddress) {
+                storeTokenDetails[i] = storeTokenDetails[storeTokenDetails.length - 1];
+                storeTokenDetails.pop();
             }
         }
 
@@ -107,6 +122,11 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
 
         emit tokenUnregistered(_tokenAddress, details.name, details.symbol);
     }
+
+   function tokensRegistered() public view returns(TokenDetails[] memory) {
+    return storeTokenDetails;
+    
+   } 
 
     function transferOwnershipOnTokenContract(address _newOwner)
         external
