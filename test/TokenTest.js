@@ -78,7 +78,13 @@ it("burn function only admin",async()=>{
    
 });
 
+it("transfer Function ",async()=>{
 
+    await token.mint(owner.address,1000);
+
+    await token.transfer(signer1.address,100);
+    expect(await token.balanceOf(signer1.address)).to.be.equal(100);
+})
 
 
 

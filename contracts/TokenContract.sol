@@ -4,6 +4,7 @@ pragma solidity ^0.8.11;
 import "./ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "hardhat/console.sol";
 
 contract TokenContract is ERC20, Ownable, Initializable {
     address public adminAddress;
@@ -86,7 +87,8 @@ contract TokenContract is ERC20, Ownable, Initializable {
             _amount <= balanceOf(msg.sender) - (frozenTokens[msg.sender]),
             "Insufficient Balance"
         );
-        transfer(_to, _amount);
+       
+       return super.transfer(_to, _amount);
     }
 
     function transferFrom(
@@ -105,7 +107,8 @@ contract TokenContract is ERC20, Ownable, Initializable {
             _amount <= balanceOf(_from) - (frozenTokens[_from]),
             "Insufficient Balance"
         );
-        transferFrom(_from, _to, _amount);
+       return super.transferFrom(_from, _to, _amount);
+
     }
 
     function freezeTokens(
