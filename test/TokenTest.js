@@ -267,4 +267,13 @@ describe("tokenContract testing ", () => {
       "onlyAdmin"
     );
   });
+
+//addBlackList 
+
+it("check addBlackList ",async()=>{
+  await token.addBlackList(signer1.address,true);
+  expect(await token.isBlacklisted(signer1.address)).to.be.true
+})
+
+
 });

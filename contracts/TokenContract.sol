@@ -168,7 +168,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         return super.transferFrom(_from, _to, _amount);
     }
 
-    /** 
+    /**
      *  @dev freezes token amount specified for given address.
      *  @param _userAddress The address for which to update frozen tokens
      *  @param _amount Amount of Tokens to be frozen
@@ -194,7 +194,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         emit TokensFrozen(_userAddress, _amount);
     }
 
-    /** 
+    /**
      *  @dev unfreezes token amount specified for given address
      *  @param _userAddress The address for which to update frozen tokens
      *  @param _amount Amount of Tokens to be unfrozen
@@ -231,7 +231,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         return frozenTokens[_userAddress];
     }
 
-    /** 
+    /**
      *  @dev sets an address frozen status for this token.
      *  @param _userAddress The address for which to update frozen status
      *  @param _freeze Frozen status of the address
@@ -279,7 +279,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         emit removeBlankListed(_removeBlankList);
     }
 
-    /** 
+    /**
      *  @dev Returns the blackList status of a wallet
      *  if isBlacklisted returns `true` the wallet is blacklisted
      *  if isBlacklisted returns `false` the wallet is not blacklisted
@@ -292,7 +292,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         return _blacklisted[_userAddress];
     }
 
-    /** 
+    /**
      * @dev Sets a new admin role address.
      * @param _adminAddress The new address allowed by the owner as Admin.
      */

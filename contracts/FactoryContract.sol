@@ -78,10 +78,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         address _tokenAddress
     ) public onlyAdmin {
         require(_tokenAddress != address(0), "Invalid Token address");
-        require(
-            !registered[_tokenAddress],
-            "Token already registered"
-        );
+        require(!registered[_tokenAddress], "Token already registered");
 
         registerToken[_tokenAddress] = TokenDetails({
             name: tokenDetails.name,
