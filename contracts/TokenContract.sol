@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     address public adminAddress;
+    uint256 internal _totalSupply;
 
     mapping(address => bool) internal frozen;
     mapping(address => bool) internal _blacklisted;
@@ -38,19 +39,30 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         );
         _;
     }
+    
 
     function initialize(
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        uint256 _initialSupply
     ) public initializer {
         __ERC20_init(_name, _symbol);
+        _totalSupply = _initialSupply;
         __Ownable_init();
     }
+
+    function totalSupply() public view override returns (uint256){
+        return _totalSupply;
+    }
+
+
+
 
     function mint(
         address _to,
         uint256 _amount
     ) public notBlacklisted(msg.sender) notBlacklisted(_to) onlyAdmin {
+       require( _totalSupply >= totalSupply() + _amount, "Amount exceeds totalSupply");
         _mint(_to, _amount);
     }
 
