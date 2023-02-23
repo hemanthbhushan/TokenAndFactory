@@ -54,9 +54,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     // ERC20(_name, _symbol);
     // }
 
-    constructor() {
-        _disableInitializers();
-    }
+    
 
     function initialize(
         string memory _name,

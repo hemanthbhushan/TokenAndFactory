@@ -10,6 +10,8 @@ describe("tokenContract testing ", () => {
     await token.deployed();
 
     await token.initialize("GNEXSolu", "Gnex");
+
+    await token.adminRole(owner.address)
   });
 
   it("check basic functions", async () => {

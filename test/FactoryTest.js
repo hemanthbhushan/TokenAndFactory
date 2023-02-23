@@ -19,7 +19,7 @@ describe("CHECK FACTORY CONTRACT", () => {
     await factory.connect(owner).adminRole(admin.address);
   });
 
-  it.only("testing createToken... ", async () => {
+  it("testing createToken... ", async () => {
     const tokenAddress = await factory
       .connect(admin)
       .createToken("OneSolutions", "onex", 18, 10000000000000);
@@ -63,49 +63,63 @@ describe("CHECK FACTORY CONTRACT", () => {
   });
 
   it("testing unRegister function ", async () => {
-    await factory.connect(admin).registerTokens(
-      {
-        name: "GenxSoultion",
-        symbol: "Genx",
-        decimals: 18,
-        initialSupply: 10000000,
-        tokenAddress: "0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e",
-      },
-      "0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e"
-    );
 
     const tokensCreated = await factory.tokensRegistered();
+    // expect(tokensCreated.length).to.equal(2);
 
-    expect(tokensCreated.length).to.equal(1);
+
+    const tokenAddress1 = await factory
+      .connect(admin)
+      .createToken("TwoSolutions", "twox", 18, 10000000000000);
+
+    let receipt = await tokenAddress1.wait();
+    const event = receipt.events?.filter((x) => {
+      return x.event == "TokenCreated";
+    });
+    console.log("events", event[0].args);
+    tokenAttached = await token.attach(event[0].args.tokenAddress);
+
+    
+   
+    const tokenscreated = await factory.tokensRegistered();
+
+    expect(tokenscreated.length).to.equal(1);
 
     await factory
       .connect(admin)
-      .unregisterTokens("0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e");
-    const tokensCreated1 = await factory.tokensRegistered();
+      .unregisterTokens(tokenAttached.address);
+    const tokenscreated1 = await factory.tokensRegistered();
 
-    expect(tokensCreated1.length).to.equal(0);
+    expect(tokenscreated1.length).to.equal(0);
   });
 
   it("check getTokenDetails function", async () => {
-    const tokenAddress = await factory
+   
+    const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("OneSolutions", "onex", 18, 10000000000000);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000);
 
-    const token = await factory.tokensRegistered();
+    let receipt = await tokenAddress1.wait();
+    const event = receipt.events?.filter((x) => {
+      return x.event == "TokenCreated";
+    });
+    console.log("events", event[0].args);
+    tokenAttached = await token.attach(event[0].args.tokenAddress);
 
     console.log(
       await factory.getTokenDetails(
-        "0xCafac3dD18aC6c6e92c921884f9E4176737C052c"
-      )
+        tokenAttached.address
+      ),
+      "before"
     );
 
     await factory
       .connect(admin)
-      .unregisterTokens("0xCafac3dD18aC6c6e92c921884f9E4176737C052c");
+      .unregisterTokens(tokenAttached.address);
 
     console.log(
       await factory.getTokenDetails(
-        "0xCafac3dD18aC6c6e92c921884f9E4176737C052c"
+        tokenAttached.address
       ),
       "afterrrrrrr"
     );
