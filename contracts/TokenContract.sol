@@ -290,6 +290,11 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         return _blacklisted[_userAddress];
     }
 
+     /*
+     * @dev Sets a new admin role address.
+     * @param _adminAddress The new address allowed by the owner as Admin.
+     */
+
     function adminRole(address _adminAddress) external onlyOwner {
         adminAddress = _adminAddress;
     }
