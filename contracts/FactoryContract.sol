@@ -4,13 +4,14 @@ pragma solidity ^0.8.15;
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./BasicMetaTransaction.sol";
 import "./interfaces/IToken.sol";
-import "hardhat/console.sol";
 
-contract FactoryContract is BasicMetaTransaction, Ownable {
-    address public implementation;
+// import "hardhat/console.sol";
 
+contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
+    address public masterToken;
     address public adminAddress;
 
     struct TokenDetails {
@@ -29,11 +30,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         address indexed tokenAddress,
         TokenDetails indexed tokenDetails
     );
-     event TokenCreated(
-        string name,
-        string symbol,
-        address tokenAddress
-    );
+    event TokenCreated(string name, string symbol, address tokenAddress);
     event tokenUnregistered(
         address indexed tokenAddress,
         string indexed name,
@@ -41,23 +38,18 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
     );
 
     modifier onlyAdmin() {
-        require(adminAddress == msgSender(), "onlyAdmin");
+        require(adminAddress == _msgSender(), "onlyAdmin");
         _;
     }
 
-    constructor(address _implementation) {
-        implementation = _implementation;
-        adminAddress = msg.sender;
+    function initialize(address _masterToken) public initializer {
+        masterToken = _masterToken;
+        adminAddress = _msgSender();
     }
 
     function adminRole(address _adminAddress) external onlyOwner {
         adminAddress = _adminAddress;
     }
-
-    //    function _initialize(address tokenAddress ,string memory _name, string memory _symbol) public {
-    //     IERC20(tokenAddress)._initialize(_name, _symbol);
-
-    //    }
 
     function createToken(
         string calldata _name,
@@ -65,14 +57,8 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         uint8 _decimals,
         uint256 _initialSupply
     ) external onlyAdmin returns (address _tokenAddress) {
-        _tokenAddress = Clones.clone(implementation);
-        console.log(_tokenAddress, "token address");
-        // IERC20(_tokenAddress).initialize(_name, _symbol);
-        IToken(_tokenAddress).initialize(_name, _symbol,_initialSupply);
-
-
-        console.log("in side contract");
-
+        _tokenAddress = Clones.clone(masterToken);
+        IToken(_tokenAddress).initialize(_name, _symbol, _initialSupply);
         registerTokens(
             TokenDetails({
                 name: _name,
@@ -83,7 +69,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
             }),
             address(_tokenAddress)
         );
-        emit TokenCreated(_name, _symbol,_tokenAddress);
+        emit TokenCreated(_name, _symbol, _tokenAddress);
         return _tokenAddress;
     }
 
@@ -91,10 +77,10 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         TokenDetails memory tokenDetails,
         address _tokenAddress
     ) public onlyAdmin {
-        require(_tokenAddress != address(0), "invalid Token address");
+        require(_tokenAddress != address(0), "Invalid Token address");
         require(
             !registered[_tokenAddress],
-            "token address is already registered"
+            "Token already registered"
         );
 
         registerToken[_tokenAddress] = TokenDetails({
@@ -112,8 +98,8 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
     }
 
     function unregisterTokens(address _tokenAddress) external onlyAdmin {
-        require(_tokenAddress != address(0), "invalid Token address");
-        require(registered[_tokenAddress], "token address is not registered");
+        require(_tokenAddress != address(0), "Invalid Token address");
+        require(registered[_tokenAddress], "Token not registered");
 
         TokenDetails memory details = registerToken[_tokenAddress];
 
@@ -139,5 +125,26 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
 
     function tokensRegistered() public view returns (TokenDetails[] memory) {
         return storeTokenDetails;
+    }
+
+    function _msgSender()
+        internal
+        view
+        override(BasicMetaTransaction, Context)
+        returns (address sender)
+    {
+        if (msg.sender == address(this)) {
+            bytes memory array = msg.data;
+            uint256 index = msg.data.length;
+            assembly {
+                // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.
+                sender := and(
+                    mload(add(array, index)),
+                    0xffffffffffffffffffffffffffffffffffffffff
+                )
+            }
+        } else {
+            return msg.sender;
+        }
     }
 }
