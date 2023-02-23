@@ -39,7 +39,6 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         );
         _;
     }
-    
 
     function initialize(
         string memory _name,
@@ -51,20 +50,45 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         __Ownable_init();
     }
 
-    function totalSupply() public view override returns (uint256){
+    function totalSupply() public view override returns (uint256) {
         return _limitSupply;
     }
 
 
-
+      /**
+     *  @dev mint tokens on a wallet
+     *  Improved version of default mint method. Tokens can be minted
+     *  to an address if only it is a verified address as per the security token.
+     *  @param _to Address to mint the tokens to.
+     *  @param _amount Amount of tokens to mint.
+     *  This function can only be called by a wallet set as Admin of the token
+     *  emits a `Transfer` event
+     */
 
     function mint(
         address _to,
         uint256 _amount
     ) public notBlacklisted(msg.sender) notBlacklisted(_to) onlyAdmin {
-       require( super.totalSupply() + _amount  <= _limitSupply, "Amount exceeds totalSupply");
+        require(
+            super.totalSupply() + _amount <= _limitSupply,
+            "Amount exceeds totalSupply"
+        );
         _mint(_to, _amount);
     }
+
+     /**
+     *  @dev burn tokens on a wallet
+     *  In case the `account` address has not enough free tokens (unfrozen tokens)
+     *  but has a total balance higher or equal to the `value` amount
+     *  the amount of frozen tokens is reduced in order to have enough free tokens
+     *  to proceed the burn, in such a case, the remaining balance on the `account`
+     *  is 100% composed of frozen tokens post-transaction.
+     *  @param _userAddress Address to burn the tokens from.
+     *  @param _amount Amount of tokens to burn.
+     *  This function can only be called by a wallet set as agent of the token
+     *  emits a `TokensUnfrozen` event if `_amount` is higher than the free balance of `_userAddress`
+     *  emits a `Transfer` event
+     */
 
     function burn(
         address _userAddress,
@@ -101,8 +125,8 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
             _amount <= balanceOf(msg.sender) - (frozenTokens[msg.sender]),
             "Insufficient Balance"
         );
-       
-       return super.transfer(_to, _amount);
+
+        return super.transfer(_to, _amount);
     }
 
     function transferFrom(
@@ -121,8 +145,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
             _amount <= balanceOf(_from) - (frozenTokens[_from]),
             "Insufficient Balance"
         );
-       return super.transferFrom(_from, _to, _amount);
-
+        return super.transferFrom(_from, _to, _amount);
     }
 
     function freezeTokens(
@@ -160,9 +183,17 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         emit TokensUnfrozen(_userAddress, _amount);
     }
 
-function getFreezeAmount(address _userAddress) external view onlyAdmin returns(uint256){
-    return frozenTokens[_userAddress];
-}
+    /**
+     *  @dev Returns the amount of tokens that are partially frozen on a wallet
+     *  the amount of frozen tokens is always <= to the total balance of the wallet
+     *  @param _userAddress the address of the wallet on which getFrozenTokens is called
+     */
+
+    function getFreezeAmount(
+        address _userAddress
+    ) external view onlyAdmin returns (uint256) {
+        return frozenTokens[_userAddress];
+    }
 
     function addBlackList(
         address _userAddress,
@@ -205,8 +236,17 @@ function getFreezeAmount(address _userAddress) external view onlyAdmin returns(u
         emit removeBlankListed(_removeBlankList);
     }
 
-    function isBlacklisted(address account) external view returns (bool) {
-        return _blacklisted[account];
+    /*
+     *  @dev Returns the blackList status of a wallet
+     *  if isBlacklisted returns `true` the wallet is blacklisted
+     *  if isBlacklisted returns `false` the wallet is not blacklisted
+     *  isBlacklisted returning `true` doesn"t mean that the balance is free, tokens could be blocked by
+     *  a freezeTokens
+     *  @param _userAddress the address of the wallet on which isFrozen is called
+     */
+
+    function isBlacklisted(address _userAddress) external view returns (bool) {
+        return _blacklisted[_userAddress];
     }
 
     function adminRole(address _adminAddress) external onlyOwner {
