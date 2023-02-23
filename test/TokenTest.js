@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { ethers, network } = require("hardhat");
+const BN = require("ethers").BigNumber;
 
 describe("tokenContract testing ", () => {
   beforeEach(async () => {
@@ -9,7 +10,11 @@ describe("tokenContract testing ", () => {
     token = await TokenContract.deploy();
     await token.deployed();
 
-    await token.initialize("GNEXSolu", "Gnex");
+    await token.initialize(
+      "GNEXSolu",
+      "Gnex",
+      BN.from("1000000").mul(BN.from("10").pow("18"))
+    );
 
     await token.adminRole(owner.address);
   });
@@ -17,11 +22,16 @@ describe("tokenContract testing ", () => {
   it("check basic functions", async () => {
     expect(await token.name()).to.equal("GNEXSolu");
     expect(await token.symbol()).to.equal("Gnex");
+    expect(await token.totalSupply()).to.equal(
+      BN.from("1000000").mul(BN.from("10").pow("18"))
+    );
+    // console.log('totalSupply()', await token.totalSupply())
   });
   //mint function
 
   it("checking mint ", async () => {
     await token.mint(signer1.address, 100);
+    // console.log('balance :>> ', await token.balanceOf(signer1.address));
     expect(await token.balanceOf(signer1.address)).to.equal(100);
   });
 
@@ -257,6 +267,4 @@ describe("tokenContract testing ", () => {
       "onlyAdmin"
     );
   });
-
-  
 });
