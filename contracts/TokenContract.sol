@@ -39,23 +39,6 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         _;
     }
 
-    // constructor(
-    //     string memory _name,
-    //     string memory _symbol
-    // ) ERC20(_name, _symbol) {
-    //     adminAddress = msg.sender;
-    // }
-
-    // function initialize(
-    //     string memory _name,
-    //     string memory _symbol
-    // ) public initializer
-    // {
-    // ERC20(_name, _symbol);
-    // }
-
-    
-
     function initialize(
         string memory _name,
         string memory _symbol
@@ -164,6 +147,10 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         frozenTokens[_userAddress] = frozenTokens[_userAddress] - (_amount);
         emit TokensUnfrozen(_userAddress, _amount);
     }
+
+function getFreezeAmount(address _userAddress) external view onlyAdmin returns(uint256){
+    return frozenTokens[_userAddress];
+}
 
     function addBlackList(
         address _userAddress,

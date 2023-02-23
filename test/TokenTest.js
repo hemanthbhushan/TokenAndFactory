@@ -117,7 +117,7 @@ describe("tokenContract testing ", () => {
     expect(await token.balanceOf(signer1.address)).to.be.equal(100);
   });
 
-  it("transferfrom Function if user blacklisted", async () => {
+  it("transferFrom Function if user blacklisted", async () => {
     await token.mint(owner.address, 1000);
 
     await token.addBlackList(signer1.address, true);
@@ -138,7 +138,7 @@ describe("tokenContract testing ", () => {
   });
 
 
-  it("transfer Function Insufficient balance", async () => {
+  it("transferFrom Function Insufficient balance", async () => {
     await token.mint(owner.address, 1000);
 
      await token.freezeTokens(owner.address,1000)
@@ -147,6 +147,118 @@ describe("tokenContract testing ", () => {
       "Insufficient Balance"
     );
   });
+
+  //freezeTokens 
+
+  it("testing freeze tokens function",async()=>{
+    
+    await token.mint(signer1.address,1000);
+
+    await token.freezeTokens(signer1.address,100);
+
+    expect(await token.getFreezeAmount(signer1.address)).to.be.equal(100);
+
+
+  })
+
+  it("testing freezetokens when amount exceed",async()=>{
+    
+    await token.mint(signer1.address,1000);
+
+    expect(token.freezeTokens(signer1.address,1001)).to.be.revertedWith("Amount exceeds available balance");
+
+
+  })
+
+  it("testing freezetokens when user blacklisted",async()=>{
+    
+    await token.mint(signer1.address,1000);
+    await token.addBlackList(owner.address, true);
+
+    expect(token.freezeTokens(signer1.address,1001)).to.be.revertedWith("Blacklistable: account is blacklisted");
+
+
+  })
+  it("testing freezetokens when msg.sender blacklisted",async()=>{
+    
+    await token.mint(signer1.address,1000);
+    await token.addBlackList(owner.address, true);
+
+    expect(token.freezeTokens(signer1.address,1001)).to.be.revertedWith("Blacklistable: account is blacklisted");
+
+
+  })
+  it("testing freezetokens when called by nonAdmin ",async()=>{
+    
+    await token.mint(signer1.address,1000);
+
+    await token.adminRole(signer1.address)
+    
+
+    expect(token.freezeTokens(signer1.address,1001)).to.be.revertedWith("onlyAdmin");
+
+
+  })
+
+  //unfreezeTokens
+
+
+  it("testing Unfreeze tokens function",async()=>{
+    
+    await token.mint(signer1.address,1000);
+
+    await token.freezeTokens(signer1.address,100);
+
+    expect(await token.getFreezeAmount(signer1.address)).to.be.equal(100);
+    await token.unfreezeTokens(signer1.address,50);
+    expect(await token.getFreezeAmount(signer1.address)).to.be.equal(50);
+     
+  })
+
+  it("testing unfreezetokens when amount exceed",async()=>{
+    
+    await token.mint(signer1.address,1000);
+    await token.freezeTokens(signer1.address,100);
+    expect(token.unfreezeTokens(signer1.address,101)).to.be.revertedWith("Amount should be less than or equal to frozen tokens");
+
+
+  })
+
+  it("testing unfreezetokens when user blacklisted",async()=>{
+    
+    await token.mint(signer1.address,1000);
+    await token.addBlackList(signer1.address, true);
+
+    expect(token.unfreezeTokens(signer1.address,10)).to.be.revertedWith("Blacklistable: account is blacklisted");
+
+
+  })
+  it("testing freezetokens when msg.sender blacklisted",async()=>{
+    
+    await token.mint(signer1.address,1000);
+    await token.addBlackList(owner.address, true);
+
+    expect(token.unfreezeTokens(signer1.address,1001)).to.be.revertedWith("Blacklistable: account is blacklisted");
+
+
+  })
+  it("testing unfreezetokens when called by nonAdmin ",async()=>{
+    
+    await token.mint(signer1.address,1000);
+
+    await token.adminRole(signer1.address)
+    
+
+    expect(token.freezeTokens(signer1.address,10)).to.be.revertedWith("onlyAdmin");
+
+
+  })
+
+  //getFreezeAmount
+
+
+
+  
 
 
 
