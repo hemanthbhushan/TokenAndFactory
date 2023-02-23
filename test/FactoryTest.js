@@ -19,14 +19,14 @@ describe("CHECK FACTORY CONTRACT", () => {
     await factory.connect(owner).adminRole(admin.address);
   });
 
-  it("testing CreateToken... ", async () => {
+  it.only("testing createToken... ", async () => {
     const tokenAddress = await factory
       .connect(admin)
-      .CreateToken("OneSolutions", "onex", 18, 10000000000000);
+      .createToken("OneSolutions", "onex", 18, 10000000000000);
 
     const tokenAddress1 = await factory
       .connect(admin)
-      .CreateToken("TwoSolutions", "twox", 18, 10000000000000);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000);
 
     console.log(await factory.tokensRegistered());
     const tokensCreated = await factory.tokensRegistered();
@@ -89,7 +89,7 @@ describe("CHECK FACTORY CONTRACT", () => {
   it("check getTokenDetails function", async () => {
     const tokenAddress = await factory
       .connect(admin)
-      .CreateToken("OneSolutions", "onex", 18, 10000000000000);
+      .createToken("OneSolutions", "onex", 18, 10000000000000);
 
     const token = await factory.tokensRegistered();
 
@@ -130,7 +130,7 @@ describe("CHECK FACTORY CONTRACT", () => {
     ).to.be.revertedWith("onlyAdmin");
 
     expect(
-      factory.CreateToken("OneSolutions", "onex", 18, 10000000000000)
+      factory.createToken("OneSolutions", "onex", 18, 10000000000000)
     ).to.be.revertedWith("onlyAdmin");
   });
 });

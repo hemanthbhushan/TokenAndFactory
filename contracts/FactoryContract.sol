@@ -68,6 +68,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable {
         _tokenAddress = Clones.clone(implementation);
         console.log(_tokenAddress, "token address");
         // IERC20(_tokenAddress).initialize(_name, _symbol);
+        IToken(_tokenAddress).initialize(_name, _symbol);
         console.log("in side contract");
 
         registerTokens(
