@@ -16,7 +16,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     mapping(address => bool) internal _blacklisted;
     mapping(address => uint256) internal frozenTokens;
 
-    event AddressFrozen(
+    event AddressBlackListed(
         address indexed _userAddress,
         bool indexed _isFrozen,
         address indexed _owner
@@ -54,8 +54,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         return _limitSupply;
     }
 
-
-      /**
+    /**
      *  @dev mint tokens on a wallet
      *  Improved version of default mint method. Tokens can be minted
      *  to an address if only it is a verified address as per the security token.
@@ -76,7 +75,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         _mint(_to, _amount);
     }
 
-     /**
+    /**
      *  @dev burn tokens on a wallet
      *  In case the `account` address has not enough free tokens (unfrozen tokens)
      *  but has a total balance higher or equal to the `value` amount
@@ -85,7 +84,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
      *  is 100% composed of frozen tokens post-transaction.
      *  @param _userAddress Address to burn the tokens from.
      *  @param _amount Amount of tokens to burn.
-     *  This function can only be called by a wallet set as agent of the token
+     *  This function can only be called by a wallet set as admin of the token
      *  emits a `TokensUnfrozen` event if `_amount` is higher than the free balance of `_userAddress`
      *  emits a `Transfer` event
      */
@@ -111,6 +110,15 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         _burn(_userAddress, _amount);
     }
 
+    /*
+     *  @dev function allowing to issue transfer
+     *  Require that the msg.sender and `to` addresses are not BlackListed.
+     *  Require that the total value should not exceed available balance.
+     *  @param _to The address of the receiver
+     *  @param _amounts The number of tokens to transfer to the corresponding receiver
+     *  emits  `Transfer` events
+     */
+
     function transfer(
         address _to,
         uint256 _amount
@@ -128,6 +136,16 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
 
         return super.transfer(_to, _amount);
     }
+
+    /*
+     *  @dev function allowing to issue transfer
+     *  Require that the msg.sender,from and `to` addresses are not BlackListed.
+     *  Require that the total value should not exceed available balance.
+     * @param _from address The address which you want to send tokens from
+     * @param _to address The address which you want to transfer to
+     * @param _value uint256 the amount of tokens to be transferred
+     *  emits  `Transfer` events
+     */
 
     function transferFrom(
         address _from,
@@ -148,6 +166,14 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         return super.transferFrom(_from, _to, _amount);
     }
 
+    /*
+     *  @dev freezes token amount specified for given address.
+     *  @param _userAddress The address for which to update frozen tokens
+     *  @param _amount Amount of Tokens to be frozen
+     *  This function can only be called by a wallet set as admin of the token
+     *  emits a `TokensFrozen` event
+     */
+
     function freezeTokens(
         address _userAddress,
         uint256 _amount
@@ -165,6 +191,14 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         frozenTokens[_userAddress] = frozenTokens[_userAddress] + (_amount);
         emit TokensFrozen(_userAddress, _amount);
     }
+
+    /*
+     *  @dev unfreezes token amount specified for given address
+     *  @param _userAddress The address for which to update frozen tokens
+     *  @param _amount Amount of Tokens to be unfrozen
+     *  This function can only be called by a wallet set as admin of the token
+     *  emits a `TokensUnfrozen` event
+     */
 
     function unfreezeTokens(
         address _userAddress,
@@ -195,6 +229,13 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         return frozenTokens[_userAddress];
     }
 
+    /*
+     *  @dev sets an address frozen status for this token.
+     *  @param _userAddress The address for which to update frozen status
+     *  @param _freeze Frozen status of the address
+     *  This function can only be called by a wallet set as admin of the token
+     *  emits an `AddressBlackListed` event
+     */
     function addBlackList(
         address _userAddress,
         bool _freeze
@@ -205,7 +246,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         onlyAdmin
     {
         _blacklisted[_userAddress] = _freeze;
-        emit AddressFrozen(_userAddress, _freeze, msg.sender);
+        emit AddressBlackListed(_userAddress, _freeze, msg.sender);
     }
 
     function addBlackListBatch(
