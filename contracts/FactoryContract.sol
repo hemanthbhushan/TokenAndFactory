@@ -73,7 +73,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         return _tokenAddress;
     }
 
-    function factoryTransfer(
+    function tokenTransfer(
         address _tokenAddress,
         address _to,
         uint256 _amount
@@ -83,7 +83,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         IToken(_tokenAddress).transfer(_to, _amount);
     }
 
-    function factoryTransferFrom(
+    function tokenTransferFrom(
         address _tokenAddress,
         address _from,
         address _to,
@@ -94,7 +94,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         IToken(_tokenAddress).transferFrom(_from, _to, _amount);
     }
 
-    function factoryMint(
+    function tokenMint(
         address _tokenAddress,
         address _to,
         uint256 _amount
@@ -104,7 +104,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         IToken(_tokenAddress).mint(_to, _amount);
     }
 
-    function factoryBurn(
+    function tokenBurn(
         address _tokenAddress,
         address _userAddress,
         uint256 _amount
