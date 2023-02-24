@@ -268,12 +268,25 @@ describe("tokenContract testing ", () => {
     );
   });
 
-//addBlackList 
+  //addBlackList
 
-it("check addBlackList ",async()=>{
-  await token.addBlackList(signer1.address,true);
-  expect(await token.isBlacklisted(signer1.address)).to.be.true
-})
+  it("check addBlackList ", async () => {
+    await token.addBlackList(signer1.address, true);
+    expect(await token.isBlacklisted(signer1.address)).to.be.true;
+  });
+
+  it("check addBlacklist with user blacklisted", async () => {
+    await token.addBlackList(signer1.address, true);
+    expect(token.addBlackList(signer1.address, true)).to.be.revertedWith(
+      "Blacklistable: account is blacklisted"
+    );
+
+    await token.addBlackList(owner.address, true);
+    expect(token.addBlackList(signer2.address, true)).to.be.revertedWith(
+      "Blacklistable: account is blacklisted"
+    );
+  });
 
 
+  
 });

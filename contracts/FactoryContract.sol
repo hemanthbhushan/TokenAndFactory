@@ -73,6 +73,47 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         return _tokenAddress;
     }
 
+    function factoryTransfer(
+        address _tokenAddress,
+        address _to,
+        uint256 _amount
+    ) external onlyAdmin {
+        require(registered[_tokenAddress], "Token not registered");
+
+        IToken(_tokenAddress).transfer(_to, _amount);
+    }
+
+    function factoryTransferFrom(
+        address _tokenAddress,
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external onlyAdmin {
+        require(registered[_tokenAddress], "Token not registered");
+
+        IToken(_tokenAddress).transferFrom(_from, _to, _amount);
+    }
+
+    function factoryMint(
+        address _tokenAddress,
+        address _to,
+        uint256 _amount
+    ) external onlyAdmin {
+        require(registered[_tokenAddress], "Token not registered");
+
+        IToken(_tokenAddress).mint(_to, _amount);
+    }
+
+    function factoryBurn(
+        address _tokenAddress,
+        address _userAddress,
+        uint256 _amount
+    ) external onlyAdmin {
+        require(registered[_tokenAddress], "Token not registered");
+
+        IToken(_tokenAddress).burn(_userAddress, _amount);
+    }
+
     function registerTokens(
         TokenDetails memory tokenDetails,
         address _tokenAddress
