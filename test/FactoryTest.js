@@ -10,26 +10,25 @@ describe("CHECK FACTORY CONTRACT", () => {
     const TokenContract = await ethers.getContractFactory("TokenContract");
     token = await TokenContract.deploy();
     await token.deployed();
-    console.log("im here");
 
     const FactoryContract = await ethers.getContractFactory("FactoryContract");
     factory = await FactoryContract.deploy();
     await factory.deployed();
     await factory.initialize(token.address);
 
-    await factory.connect(owner).adminRole(admin.address);
+    await factory.connect(owner).addAdminRole(admin.address);
   });
 
   it("testing createToken... ", async () => {
     const tokenAddress = await factory
       .connect(admin)
-      .createToken("OneSolutions", "onex", 18, 10000000000000);
+      .createToken("OneSolutions", "onex", 18, 10000000000000, admin.address);
 
     const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("TwoSolutions", "twox", 18, 10000000000000);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
 
-    console.log(await factory.tokensRegistered());
+    // console.log(await factory.tokensRegistered());
     const tokensCreated = await factory.tokensRegistered();
     // expect(tokensCreated.length).to.equal(2);
 
@@ -66,7 +65,7 @@ describe("CHECK FACTORY CONTRACT", () => {
 
     const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("TwoSolutions", "twox", 18, 10000000000000);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
 
     let receipt = await tokenAddress1.wait();
     const event = receipt.events?.filter((x) => {
@@ -88,7 +87,7 @@ describe("CHECK FACTORY CONTRACT", () => {
   it("check getTokenDetails function", async () => {
     const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("TwoSolutions", "twox", 18, 10000000000000);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
 
     let receipt = await tokenAddress1.wait();
     const event = receipt.events?.filter((x) => {
@@ -130,24 +129,101 @@ describe("CHECK FACTORY CONTRACT", () => {
     ).to.be.revertedWith("onlyAdmin");
   });
 
-  //tokenTransfer
+  //tokenMint
+
+  it("testing tokenMint", async () => {
+    // await tokenAddress1.addAdminRole(factory.address)
+    const tokenAddress1 = await factory
+      .connect(admin)
+      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
+
+    let receipt = await tokenAddress1.wait();
+    const event = receipt.events?.filter((x) => {
+      return x.event == "TokenCreated";
+    });
+
+    tokenAttached = await token.attach(event[0].args.tokenAddress);
+
+    await factory
+      .connect(admin)
+      .tokenMint(tokenAttached.address, signer1.address, 100);
+
+    const balance = await factory
+      .connect(admin)
+      .tokenBalance(tokenAttached.address, signer1.address);
+
+    expect(balance).to.be.equal(100);
+  });
+
+  // tokenTransfer
 
   it.only("testing tokenTransfer", async () => {
-    const tokenAddress1 = await factory.connect(admin).createToken(
-      "TwoSolutions",
-      "twox",
-      18,
-      10000000000000
+    const tokenAddress1 = await factory
+      .connect(admin)
+      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
+
+    let receipt = await tokenAddress1.wait();
+    const event = receipt.events?.filter((x) => {
+      return x.event == "TokenCreated";
+    });
+
+    tokenAttached = await token.attach(event[0].args.tokenAddress);
+
+    await factory
+      .connect(admin)
+      .tokenMint(tokenAttached.address, factory.address, 100);
+
+    const balance1 = await factory.tokenBalance(
+      tokenAttached.address,
+      admin.address
     );
 
-    const tokensCreated = await factory.tokensRegistered();
+    console.log("balance1", balance1);
 
-    await factory.connect(admin).tokenMint(
-      tokensCreated[0].tokenAddress,
-      signer1.address,
-      100
+    await factory
+      .connect(admin)
+      .tokenTransfer(tokenAttached.address, signer1.address, 50);
+
+    const balance = await factory.tokenBalance(
+      tokenAttached.address,
+      signer1.address
     );
-
-    
+    console.log("balance", balance);
+    expect(balance).to.be.equal(50);
   });
+  it.only("testing tokenTransferFrom", async () => {
+    const tokenAddress1 = await factory
+      .connect(admin)
+      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
+
+    let receipt = await tokenAddress1.wait();
+    const event = receipt.events?.filter((x) => {
+      return x.event == "TokenCreated";
+    });
+
+    tokenAttached = await token.attach(event[0].args.tokenAddress);
+
+    await factory
+      .connect(admin)
+      .tokenMint(tokenAttached.address, factory.address, 100);
+
+    const balance1 = await factory.tokenBalance(
+      tokenAttached.address,
+      admin.address
+    );
+
+    console.log("balance1", balance1);
+
+    await factory
+      .connect(admin)
+      .tokenTransferFrom(tokenAttached.address,factory.address ,signer1.address, 50);
+
+    const balance = await factory.tokenBalance(
+      tokenAttached.address,
+      signer1.address
+    );
+    console.log("balance", balance);
+    expect(balance).to.be.equal(50);
+  });
+
 });

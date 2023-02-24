@@ -2,7 +2,7 @@
 pragma solidity ^0.8.15;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./BasicMetaTransaction.sol";
@@ -10,9 +10,13 @@ import "./interfaces/IToken.sol";
 
 // import "hardhat/console.sol";
 
-contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
+contract FactoryContract is
+    BasicMetaTransaction,
+    Initializable,
+    AccessControlUpgradeable
+{
     address public masterToken;
-    address public adminAddress;
+    address public owner;
 
     struct TokenDetails {
         string name;
@@ -37,8 +41,10 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         string indexed symbol
     );
 
-    modifier onlyAdmin() {
-        require(adminAddress == _msgSender(), "onlyAdmin");
+    bytes32 public constant ADMIN_ROLE = 0x00;
+
+    modifier onlyOwner() {
+        require(_msgSender() == owner, "Only owner can call");
         _;
     }
 
@@ -49,21 +55,39 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
 
     function initialize(address _masterToken) public initializer {
         masterToken = _masterToken;
-        adminAddress = _msgSender();
+        owner  = _msgSender();
+        _setupRole(ADMIN_ROLE, _msgSender());
     }
 
-    function adminRole(address _adminAddress) external onlyOwner {
-        adminAddress = _adminAddress;
+    function addAdminRole(address _address) public onlyOwner {
+        _setupRole(ADMIN_ROLE, _address);
+    }
+
+    function revokeAdminrole(address _address) external onlyOwner {
+        require(isAdmin(_address), "Doesn't have Admin Role");
+        revokeRole(ADMIN_ROLE, _address);
+    }
+
+    function isAdmin(address _userAddress) public view returns (bool) {
+        return hasRole(ADMIN_ROLE, _userAddress);
     }
 
     function createToken(
         string calldata _name,
         string calldata _symbol,
         uint8 _decimals,
-        uint256 _initialSupply
-    ) external onlyAdmin returns (address _tokenAddress) {
+        uint256 _initialSupply,
+        address _owner
+    ) external  returns (address _tokenAddress) {
+
+        require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         _tokenAddress = Clones.clone(masterToken);
-        IToken(_tokenAddress).initialize(_name, _symbol, _initialSupply);
+        IToken(_tokenAddress).initialize(
+            _name,
+            _symbol,
+            _initialSupply,
+            _owner
+        );
         registerTokens(
             TokenDetails({
                 name: _name,
@@ -74,6 +98,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
             }),
             address(_tokenAddress)
         );
+        IToken(_tokenAddress).adminRole(address(this));
         emit TokenCreated(_name, _symbol, _tokenAddress);
         return _tokenAddress;
     }
@@ -82,7 +107,8 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         address _tokenAddress,
         address _to,
         uint256 _amount
-    ) external onlyRegistered(_tokenAddress) onlyAdmin {
+    ) external onlyRegistered(_tokenAddress)  {
+        require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).transfer(_to, _amount);
     }
 
@@ -91,7 +117,8 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         address _from,
         address _to,
         uint256 _amount
-    ) external onlyRegistered(_tokenAddress) onlyAdmin {
+    ) external onlyRegistered(_tokenAddress)  {
+        require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).transferFrom(_from, _to, _amount);
     }
 
@@ -103,19 +130,27 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         IToken(_tokenAddress).mint(_to, _amount);
     }
 
+    function tokenBalance(
+        address _tokenAddress,
+        address _userAddress
+    ) external view onlyRegistered(_tokenAddress) returns (uint256) {
+        return IToken(_tokenAddress).balanceOf(_userAddress);
+    }
+
     function tokenBurn(
         address _tokenAddress,
         address _userAddress,
         uint256 _amount
-    ) external onlyRegistered(_tokenAddress) onlyAdmin {
+    ) external onlyRegistered(_tokenAddress)  {
+        require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).burn(_userAddress, _amount);
-    } 
-
+    }
 
     function registerTokens(
         TokenDetails memory tokenDetails,
         address _tokenAddress
-    ) public onlyAdmin {
+    ) public  {
+        require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         require(_tokenAddress != address(0), "Invalid Token address");
         require(!registered[_tokenAddress], "Token already registered");
 
@@ -133,7 +168,8 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         emit tokenRegistered(_tokenAddress, tokenDetails);
     }
 
-    function unregisterTokens(address _tokenAddress) external onlyAdmin {
+    function unregisterTokens(address _tokenAddress) external  {
+        require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         require(_tokenAddress != address(0), "Invalid Token address");
         require(registered[_tokenAddress], "Token not registered");
 
@@ -166,7 +202,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
     function _msgSender()
         internal
         view
-        override(BasicMetaTransaction, Context)
+        override(BasicMetaTransaction,ContextUpgradeable)
         returns (address sender)
     {
         if (msg.sender == address(this)) {

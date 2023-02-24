@@ -13,7 +13,8 @@ describe("tokenContract testing ", () => {
     await token.initialize(
       "GNEXSolu",
       "Gnex",
-      BN.from("1000000").mul(BN.from("10").pow("18"))
+      BN.from("1000000").mul(BN.from("10").pow("18")),
+      admin.address
     );
 
     await token.adminRole(owner.address);
