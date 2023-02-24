@@ -42,6 +42,11 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         _;
     }
 
+    modifier onlyRegistered(address _tokenAddress) {
+        require(registered[_tokenAddress], "Token not registered");
+        _;
+    }
+
     function initialize(address _masterToken) public initializer {
         masterToken = _masterToken;
         adminAddress = _msgSender();
@@ -77,9 +82,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         address _tokenAddress,
         address _to,
         uint256 _amount
-    ) external onlyAdmin {
-        require(registered[_tokenAddress], "Token not registered");
-
+    ) external onlyRegistered(_tokenAddress) onlyAdmin {
         IToken(_tokenAddress).transfer(_to, _amount);
     }
 
@@ -88,9 +91,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         address _from,
         address _to,
         uint256 _amount
-    ) external onlyAdmin {
-        require(registered[_tokenAddress], "Token not registered");
-
+    ) external onlyRegistered(_tokenAddress) onlyAdmin {
         IToken(_tokenAddress).transferFrom(_from, _to, _amount);
     }
 
@@ -98,9 +99,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         address _tokenAddress,
         address _to,
         uint256 _amount
-    ) external onlyAdmin {
-        require(registered[_tokenAddress], "Token not registered");
-
+    ) external onlyRegistered(_tokenAddress) onlyAdmin {
         IToken(_tokenAddress).mint(_to, _amount);
     }
 
@@ -108,9 +107,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         address _tokenAddress,
         address _userAddress,
         uint256 _amount
-    ) external onlyAdmin {
-        require(registered[_tokenAddress], "Token not registered");
-
+    ) external onlyRegistered(_tokenAddress) onlyAdmin {
         IToken(_tokenAddress).burn(_userAddress, _amount);
     }
 
