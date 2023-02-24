@@ -99,7 +99,7 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         address _tokenAddress,
         address _to,
         uint256 _amount
-    ) external onlyRegistered(_tokenAddress) onlyAdmin {
+    ) external onlyRegistered(_tokenAddress) {
         IToken(_tokenAddress).mint(_to, _amount);
     }
 
@@ -109,7 +109,8 @@ contract FactoryContract is BasicMetaTransaction, Ownable, Initializable {
         uint256 _amount
     ) external onlyRegistered(_tokenAddress) onlyAdmin {
         IToken(_tokenAddress).burn(_userAddress, _amount);
-    }
+    } 
+
 
     function registerTokens(
         TokenDetails memory tokenDetails,

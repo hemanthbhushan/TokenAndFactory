@@ -50,6 +50,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         __ERC20_init(_name, _symbol);
         _limitSupply = _initialSupply;
         __Ownable_init();
+        adminAddress = msg.sender;
     }
 
     function totalSupply() public view override returns (uint256) {
