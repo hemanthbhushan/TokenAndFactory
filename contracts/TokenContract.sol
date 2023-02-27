@@ -7,10 +7,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "./interfaces/IAdminRole.sol";
 
 contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     address public adminAddress;
     uint256 internal _limitSupply;
+
+    address public factoryAddress;
 
     mapping(address => bool) internal frozen;
     mapping(address => bool) internal _blacklisted;
@@ -30,7 +33,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     event adminChanged(address indexed oldAdmin, address indexed newAdmin);
 
     modifier onlyAdmin() {
-        require(adminAddress == msg.sender, "onlyAdmin");
+        require(IAdminRole(factoryAddress).isAdmin(msg.sender), "onlyAdmin");
         _;
     }
 
@@ -57,6 +60,10 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
 
     function totalSupply() public view override returns (uint256) {
         return _limitSupply;
+    }
+
+    function addFactoryContract(address _factoryAddress) external onlyOwner {
+        factoryAddress = _factoryAddress;
     }
 
     /**
@@ -170,6 +177,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         );
         return super.transferFrom(_from, _to, _amount);
     }
+
 
     /**
      *  @dev freezes token amount specified for given address.

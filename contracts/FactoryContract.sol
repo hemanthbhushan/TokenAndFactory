@@ -72,6 +72,8 @@ contract FactoryContract is
         return hasRole(ADMIN_ROLE, _userAddress);
     }
 
+   
+
     function createToken(
         string calldata _name,
         string calldata _symbol,
@@ -107,7 +109,7 @@ contract FactoryContract is
         address _to,
         uint256 _amount
     ) external onlyRegistered(_tokenAddress) {
-        require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
+        // require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).transfer(_to, _amount);
     }
 
@@ -117,7 +119,7 @@ contract FactoryContract is
         address _to,
         uint256 _amount
     ) external onlyRegistered(_tokenAddress) {
-        require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
+        // require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).transferFrom(_from, _to, _amount);
     }
 
@@ -127,7 +129,7 @@ contract FactoryContract is
         uint256 _amount
     ) external onlyRegistered(_tokenAddress) {
 
-         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
+        //  require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).approve(_to,_amount);
 
 
@@ -138,6 +140,7 @@ contract FactoryContract is
         address _to,
         uint256 _amount
     ) external onlyRegistered(_tokenAddress) {
+        // require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).mint(_to, _amount);
     }
 
@@ -153,7 +156,7 @@ contract FactoryContract is
         address _userAddress,
         uint256 _amount
     ) external onlyRegistered(_tokenAddress) {
-        require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
+        // require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).burn(_userAddress, _amount);
     }
 
