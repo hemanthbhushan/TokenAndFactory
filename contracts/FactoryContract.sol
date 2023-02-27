@@ -55,7 +55,7 @@ contract FactoryContract is
 
     function initialize(address _masterToken) public initializer {
         masterToken = _masterToken;
-        owner  = _msgSender();
+        owner = _msgSender();
         _setupRole(ADMIN_ROLE, _msgSender());
     }
 
@@ -78,8 +78,7 @@ contract FactoryContract is
         uint8 _decimals,
         uint256 _initialSupply,
         address _owner
-    ) external  returns (address _tokenAddress) {
-
+    ) external returns (address _tokenAddress) {
         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         _tokenAddress = Clones.clone(masterToken);
         IToken(_tokenAddress).initialize(
@@ -107,7 +106,7 @@ contract FactoryContract is
         address _tokenAddress,
         address _to,
         uint256 _amount
-    ) external onlyRegistered(_tokenAddress)  {
+    ) external onlyRegistered(_tokenAddress) {
         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).transfer(_to, _amount);
     }
@@ -117,9 +116,21 @@ contract FactoryContract is
         address _from,
         address _to,
         uint256 _amount
-    ) external onlyRegistered(_tokenAddress)  {
+    ) external onlyRegistered(_tokenAddress) {
         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).transferFrom(_from, _to, _amount);
+    }
+
+    function tokenApprove(
+        address _tokenAddress,
+        address _to,
+        uint256 _amount
+    ) external onlyRegistered(_tokenAddress) {
+
+         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
+        IToken(_tokenAddress).approve(_to,_amount);
+
+
     }
 
     function tokenMint(
@@ -141,7 +152,7 @@ contract FactoryContract is
         address _tokenAddress,
         address _userAddress,
         uint256 _amount
-    ) external onlyRegistered(_tokenAddress)  {
+    ) external onlyRegistered(_tokenAddress) {
         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         IToken(_tokenAddress).burn(_userAddress, _amount);
     }
@@ -149,7 +160,7 @@ contract FactoryContract is
     function registerTokens(
         TokenDetails memory tokenDetails,
         address _tokenAddress
-    ) public  {
+    ) public {
         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         require(_tokenAddress != address(0), "Invalid Token address");
         require(!registered[_tokenAddress], "Token already registered");
@@ -168,7 +179,7 @@ contract FactoryContract is
         emit tokenRegistered(_tokenAddress, tokenDetails);
     }
 
-    function unregisterTokens(address _tokenAddress) external  {
+    function unregisterTokens(address _tokenAddress) external {
         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
         require(_tokenAddress != address(0), "Invalid Token address");
         require(registered[_tokenAddress], "Token not registered");
@@ -202,7 +213,7 @@ contract FactoryContract is
     function _msgSender()
         internal
         view
-        override(BasicMetaTransaction,ContextUpgradeable)
+        override(BasicMetaTransaction, ContextUpgradeable)
         returns (address sender)
     {
         if (msg.sender == address(this)) {
