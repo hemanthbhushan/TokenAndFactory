@@ -17,7 +17,14 @@ describe("tokenContract testing ", () => {
       admin.address
     );
 
-    await token.adminRole(owner.address);
+    const FactoryContract = await ethers.getContractFactory("FactoryContract");
+    factory = await FactoryContract.deploy();
+    await factory.deployed();
+    await factory.initialize(token.address);
+
+    await factory.connect(owner).addAdminRole(admin.address);
+
+    // await token.adminRole(owner.address);
   });
 
   it("check basic functions", async () => {

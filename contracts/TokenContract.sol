@@ -48,14 +48,14 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     function initialize(
         string memory _name,
         string memory _symbol,
-        uint256 _initialSupply,
-        address _owner
+        uint256 _initialSupply
+        // address _owner
     ) public initializer {
         __ERC20_init(_name, _symbol);
         _limitSupply = _initialSupply;
         __Ownable_init();
         // adminAddress = _owner;
-        adminRole(_owner);
+        // adminRole(_owner);
     }
 
     function totalSupply() public view override returns (uint256) {
@@ -308,10 +308,10 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
      * @param _owner The new address allowed by the owner as Admin.
      */
 
-    function adminRole(address _owner) public onlyOwner {
-        address _oldAdmin = adminAddress;
-        adminAddress = _owner;
+    // function adminRole(address _owner) public onlyOwner {
+    //     address _oldAdmin = adminAddress;
+    //     adminAddress = _owner;
 
-        emit adminChanged(_oldAdmin, adminAddress);
-    }
+    //     emit adminChanged(_oldAdmin, adminAddress);
+    // }
 }
