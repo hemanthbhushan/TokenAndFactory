@@ -288,6 +288,40 @@ describe("tokenContract testing ", () => {
     );
   });
 
+  //addBlackListBatch
+  it("check addBlackListBatch with user blacklisted", async () => {
+    await token.addBlackListBatch([owner.address, signer1.address]);
+    expect(token.addBlackList(signer2.address, true)).to.be.revertedWith(
+      "Blacklistable: account is blacklisted"
+    );
+    expect(
+      token.connect(signer1).addBlackListBatch([signer2.address])
+    ).to.be.revertedWith("Blacklistable: account is blacklisted");
+  });
 
-  
+  it("check addBlackListBatch with user already blacklisted", async () => {
+    await token.addBlackListBatch([signer2.address, signer1.address]);
+    expect(token.addBlackListBatch([signer2.address])).to.be.revertedWith(
+      "address already blacklisted"
+    );
+    expect(
+      token.connect(signer1).addBlackListBatch([signer1.address])
+    ).to.be.revertedWith("address already blacklisted");
+  });
+
+  //removeBlackkListBatch
+
+  it("check removeBlackkListBatch with user blacklisted", async () => {
+    await token.addBlackListBatch([signer2.address, signer1.address]);
+    await token.removeBlackkListBatch([signer2.address]);
+    expect(
+      await token.connect(signer1).isBlacklisted(signer2.address)
+    ).to.be.equal(false);
+  });
+
+  it("check removeBlackkListBatch with user blacklisted", async () => {
+    expect(token.removeBlackkListBatch([signer2.address])).to.be.revertedWith(
+      "address not blacklisted"
+    );
+  });
 });

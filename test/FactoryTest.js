@@ -191,7 +191,7 @@ describe("CHECK FACTORY CONTRACT", () => {
   });
 
 
-  it.only("testing tokenTransferFrom", async () => {
+  it("testing tokenTransferFrom", async () => {
     const tokenAddress1 = await factory
       .connect(admin)
       .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
