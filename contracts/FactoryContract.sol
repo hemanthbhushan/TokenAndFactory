@@ -53,10 +53,10 @@ contract FactoryContract is
         _;
     }
 
-    function initialize(address _masterToken) public initializer {
+    function initialize(address _masterToken,address _owner) public initializer {
         masterToken = _masterToken;
-        owner = _msgSender();
-        _setupRole(ADMIN_ROLE, _msgSender());
+        owner = _owner;
+        _setupRole(ADMIN_ROLE, _owner);
     }
 
     function addAdminRole(address _address) public onlyOwner {

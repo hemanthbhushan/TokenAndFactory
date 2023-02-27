@@ -1,28 +1,42 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
-const hre = require("hardhat");
+const BN = require("ethers").BigNumber;
+const { ethers } = require("hardhat");
 
-async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
-
-  const lockedAmount = hre.ethers.utils.parseEther("1");
-
-  const Lock = await hre.ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log(
-    `Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
-  );
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
+async function main() {
+  const [deployer] = await ethers.getSigners();
+  const { chainId } = await ethers.provider.getNetwork();
 
+  const owner = "0x14ef97a0a27EeDDFd9A1499FD7ef99b52F8C7452";
+  console.log("im here");
+
+  const FactoryContract = await ethers.getContractFactory("FactoryContract");
+
+  const TokenContract = await ethers.getContractFactory("TokenContract");
+  const OwnedUpgradeabilityProxy = await ethers.getContractFactory(
+    "OwnedUpgradeabilityProxy"
+  );
+
+  let factory = await FactoryContract.deploy();
+  console.log("FactoryContract address", factory.address);
+  await sleep(6000);
+
+  let token = await TokenContract.deploy();
+  console.log("TokenContract address", token.address);
+  await sleep(6000);
+ 
+
+  let proxy = await OwnedUpgradeabilityProxy.deploy();
+  console.log("proxy address", proxy.address);
+  await sleep(6000);
+
+  await proxy.upgradeTo(factory.address);
+  await sleep(6000);
+
+  let proxy1 = FactoryContract.attach(proxy.address);
+  console.log("proxy1", proxy1.address);
+}
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main().catch((error) => {

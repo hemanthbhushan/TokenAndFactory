@@ -2,22 +2,39 @@ require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-contract-sizer");
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-truffle5");
+require('dotenv').config()
+
+
+
+// dotenv.config();
+
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
+  // defaultNetwork: "matic",
+  networks: {
+    polygon_mumbai: {
+      // url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.ALCHEMY_PVT_KEY}`,
+      url: `${process.env.RPC}`,
+      accounts: [`0x${process.env.PVTKEY}`],
+    },
+  },
+  etherscan: {
+    apiKey: process.env.API_KEY_POLYGON,
+  },
   solidity: {
-    compilers:[{
-      version:"0.8.17",
-      settings: {
-        optimizer: {
-          enabled: true,
-          runs: 200,
+    compilers: [
+      {
+        version: "0.8.17",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
         },
       },
-    }
     ],
   },
-
 
   contractSizer: {
     alphaSort: false,
@@ -25,11 +42,5 @@ module.exports = {
     runOnCompile: true,
     strict: false,
     only: [""],
-  },
-
-  etherscan: {
-    apiKey: {
-      polygonMumbai: `${process.env.MUMBAI_API}`,
-    },
   },
 };
