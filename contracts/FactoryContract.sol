@@ -8,6 +8,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./BasicMetaTransaction.sol";
 import "./interfaces/IToken.sol";
 
+
+
 // import "hardhat/console.sol";
 
 contract FactoryContract is
@@ -41,7 +43,7 @@ contract FactoryContract is
         string indexed symbol
     );
 
-    bytes32 public constant ADMIN_ROLE = 0x00;
+      bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     modifier onlyOwner() {
         require(_msgSender() == owner, "Only owner can call");
@@ -53,7 +55,10 @@ contract FactoryContract is
         _;
     }
 
-    function initialize(address _masterToken,address _owner) public initializer {
+    function initialize(
+        address _masterToken,
+        address _owner
+    ) public initializer {
         masterToken = _masterToken;
         owner = _owner;
         _setupRole(ADMIN_ROLE, _owner);
@@ -72,24 +77,16 @@ contract FactoryContract is
         return hasRole(ADMIN_ROLE, _userAddress);
     }
 
-   
-
     function createToken(
         string calldata _name,
         string calldata _symbol,
         uint8 _decimals,
-        uint256 _initialSupply 
-        // address _owner
+        uint256 _initialSupply
     ) external returns (address _tokenAddress) {
         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
-        
+
         _tokenAddress = Clones.clone(masterToken);
-        IToken(_tokenAddress).initialize(
-            _name,
-            _symbol,
-            _initialSupply
-            // _owner
-        );
+        IToken(_tokenAddress).initialize(_name, _symbol, _initialSupply);
         registerTokens(
             TokenDetails({
                 name: _name,
@@ -101,7 +98,7 @@ contract FactoryContract is
             address(_tokenAddress)
         );
         _setupRole(ADMIN_ROLE, address(this));
-        // IToken(_tokenAddress).adminRole(address(this));
+
         emit TokenCreated(_name, _symbol, _tokenAddress);
         return _tokenAddress;
     }
@@ -130,11 +127,8 @@ contract FactoryContract is
         address _to,
         uint256 _amount
     ) external onlyRegistered(_tokenAddress) {
-
         //  require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
-        IToken(_tokenAddress).approve(_to,_amount);
-
-
+        IToken(_tokenAddress).approve(_to, _amount);
     }
 
     function tokenMint(

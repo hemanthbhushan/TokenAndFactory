@@ -7,13 +7,15 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./interfaces/IAdminRole.sol";
+import "./interfaces/IFactory.sol";
+import "hardhat/console.sol";
 
 contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     address public adminAddress;
     uint256 internal _limitSupply;
 
     address public factoryAddress;
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     mapping(address => bool) internal frozen;
     mapping(address => bool) internal _blacklisted;
@@ -32,11 +34,20 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
 
     event adminChanged(address indexed oldAdmin, address indexed newAdmin);
 
+    // modifier onlyAdmin() {
+
+    //     console.log(IAdminRole(factoryAddress).isAdmin(msg.sender),"check only for the admin");
+    //     require(IAdminRole(factoryAddress).isAdmin(msg.sender), "onlyAdmin");
+    //     _;
+
+    // }
     modifier onlyAdmin() {
-        require(IAdminRole(factoryAddress).isAdmin(msg.sender), "onlyAdmin");
+        require(
+            IFactory(factoryAddress).hasRole(ADMIN_ROLE, msg.sender),
+            "Staking: Not Admin"
+        );
         _;
     }
-
     modifier notBlacklisted(address account) {
         require(
             !_blacklisted[account],
@@ -49,8 +60,11 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         string memory _name,
         string memory _symbol,
         uint256 _initialSupply
+    )
+        public
         // address _owner
-    ) public initializer {
+        initializer
+    {
         __ERC20_init(_name, _symbol);
         _limitSupply = _initialSupply;
         __Ownable_init();
@@ -178,7 +192,6 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         return super.transferFrom(_from, _to, _amount);
     }
 
-
     /**
      *  @dev freezes token amount specified for given address.
      *  @param _userAddress The address for which to update frozen tokens
@@ -238,7 +251,7 @@ contract TokenContract is Initializable, ERC20Upgradeable, OwnableUpgradeable {
 
     function getFreezeAmount(
         address _userAddress
-    ) external view onlyAdmin returns (uint256) {
+    ) external view  returns (uint256) {
         return frozenTokens[_userAddress];
     }
 

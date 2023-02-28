@@ -55,5 +55,6 @@ interface IFactory {
     
 
      function tokensRegistered() external;
+    function hasRole(bytes32 role, address account) external returns(bool);
 
 }

@@ -11,12 +11,17 @@ describe("CHECK FACTORY CONTRACT", () => {
     token = await TokenContract.deploy();
     await token.deployed();
 
+    await token.initialize("USDX","USDX",1000000);
+
     const FactoryContract = await ethers.getContractFactory("FactoryContract");
     factory = await FactoryContract.deploy();
     await factory.deployed();
     await factory.initialize(token.address, owner.address);
 
     await factory.connect(owner).addAdminRole(admin.address);
+
+    await token.addFactoryContract(factory.address);
+
   });
 
   it("testing createToken... ", async () => {
@@ -135,6 +140,8 @@ describe("CHECK FACTORY CONTRACT", () => {
     const tokenAddress1 = await factory
       .connect(admin)
       .createToken("TwoSolutions", "twox", 18, 10000000000000);
+
+      console.log(await factory.isAdmin(factory.address),"factory contract exists")
 
     let receipt = await tokenAddress1.wait();
     const event = receipt.events?.filter((x) => {
