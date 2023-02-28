@@ -14,7 +14,7 @@ describe("CHECK FACTORY CONTRACT", () => {
     const FactoryContract = await ethers.getContractFactory("FactoryContract");
     factory = await FactoryContract.deploy();
     await factory.deployed();
-    await factory.initialize(token.address);
+    await factory.initialize(token.address, owner.address);
 
     await factory.connect(owner).addAdminRole(admin.address);
   });
@@ -22,13 +22,12 @@ describe("CHECK FACTORY CONTRACT", () => {
   it("testing createToken... ", async () => {
     const tokenAddress = await factory
       .connect(admin)
-      .createToken("OneSolutions", "onex", 18, 10000000000000, admin.address);
+      .createToken("OneSolutions", "onex", 18, 10000000000000);
 
     const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000);
 
-    // console.log(await factory.tokensRegistered());
     const tokensCreated = await factory.tokensRegistered();
     // expect(tokensCreated.length).to.equal(2);
 
@@ -65,7 +64,7 @@ describe("CHECK FACTORY CONTRACT", () => {
 
     const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000);
 
     let receipt = await tokenAddress1.wait();
     const event = receipt.events?.filter((x) => {
@@ -87,7 +86,7 @@ describe("CHECK FACTORY CONTRACT", () => {
   it("check getTokenDetails function", async () => {
     const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000);
 
     let receipt = await tokenAddress1.wait();
     const event = receipt.events?.filter((x) => {
@@ -131,11 +130,11 @@ describe("CHECK FACTORY CONTRACT", () => {
 
   //tokenMint
 
-  it("testing tokenMint", async () => {
+  it.only("testing tokenMint", async () => {
     // await tokenAddress1.addAdminRole(factory.address)
     const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000);
 
     let receipt = await tokenAddress1.wait();
     const event = receipt.events?.filter((x) => {
@@ -148,6 +147,9 @@ describe("CHECK FACTORY CONTRACT", () => {
       .connect(admin)
       .tokenMint(tokenAttached.address, signer1.address, 100);
 
+    console.log("Im here");
+
+     
     const balance = await factory
       .connect(admin)
       .tokenBalance(tokenAttached.address, signer1.address);
@@ -160,7 +162,7 @@ describe("CHECK FACTORY CONTRACT", () => {
   it("testing tokenTransfer", async () => {
     const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000);
 
     let receipt = await tokenAddress1.wait();
     const event = receipt.events?.filter((x) => {
@@ -190,11 +192,10 @@ describe("CHECK FACTORY CONTRACT", () => {
     expect(balance).to.be.equal(50);
   });
 
-
   it("testing tokenTransferFrom", async () => {
     const tokenAddress1 = await factory
       .connect(admin)
-      .createToken("TwoSolutions", "twox", 18, 10000000000000, admin.address);
+      .createToken("TwoSolutions", "twox", 18, 10000000000000);
 
     let receipt = await tokenAddress1.wait();
     const event = receipt.events?.filter((x) => {
@@ -216,11 +217,18 @@ describe("CHECK FACTORY CONTRACT", () => {
 
     // await factory.connect(admin).tokenApprove()
 
-    await factory.connect(admin).tokenApprove(tokenAttached.address,factory.address,100)
+    await factory
+      .connect(admin)
+      .tokenApprove(tokenAttached.address, factory.address, 100);
 
     await factory
       .connect(admin)
-      .tokenTransferFrom(tokenAttached.address,factory.address ,signer1.address, 50);
+      .tokenTransferFrom(
+        tokenAttached.address,
+        factory.address,
+        signer1.address,
+        50
+      );
 
     const balance = await factory.tokenBalance(
       tokenAttached.address,
@@ -229,5 +237,4 @@ describe("CHECK FACTORY CONTRACT", () => {
     console.log("balance", balance);
     expect(balance).to.be.equal(50);
   });
-
 });

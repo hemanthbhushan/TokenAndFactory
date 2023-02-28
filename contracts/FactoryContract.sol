@@ -78,16 +78,17 @@ contract FactoryContract is
         string calldata _name,
         string calldata _symbol,
         uint8 _decimals,
-        uint256 _initialSupply,
-        address _owner
+        uint256 _initialSupply 
+        // address _owner
     ) external returns (address _tokenAddress) {
         require(hasRole(ADMIN_ROLE, _msgSender()), "onlyAdmin");
+        
         _tokenAddress = Clones.clone(masterToken);
         IToken(_tokenAddress).initialize(
             _name,
             _symbol,
-            _initialSupply,
-            _owner
+            _initialSupply
+            // _owner
         );
         registerTokens(
             TokenDetails({
@@ -99,7 +100,8 @@ contract FactoryContract is
             }),
             address(_tokenAddress)
         );
-        IToken(_tokenAddress).adminRole(address(this));
+        _setupRole(ADMIN_ROLE, address(this));
+        // IToken(_tokenAddress).adminRole(address(this));
         emit TokenCreated(_name, _symbol, _tokenAddress);
         return _tokenAddress;
     }

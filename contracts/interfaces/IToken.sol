@@ -12,8 +12,8 @@ interface IToken is IERC20 {
     function initialize(
         string memory name_,
         string memory symbol_,
-        uint256 _totalSupply,
-        address _owner
+        uint256 _totalSupply
+        // address _owner 
     ) external;
 
     function mint(address _to, uint256 _amount) external;
